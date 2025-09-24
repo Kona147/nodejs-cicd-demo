@@ -1,4 +1,4 @@
-name: Node.js CI/CD with Docker
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,26 +6,25 @@ on:
       - main
 
 jobs:
-  build-and-run:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run tests
-        run: npm test || echo "No tests found"
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
       - name: Build Docker image
-        run: docker build -t nodejs-cicd-demo:latest .
+        run: |
+          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/nodejs-cicd-demo
+          GIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+          docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:$GIT_SHA .
 
-      - name: Run Docker container
-        run: docker run -d -p 3000:3000 nodejs-cicd-demo:latest
+      - name: Push Docker image to Docker Hub
+        run: |
+          IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/nodejs-cicd-demo
+          GIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:$GIT_SHA
