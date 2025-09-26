@@ -13,6 +13,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Show environment info (debugging)
+        run: |
+          echo "Commit SHA: $GITHUB_SHA"
+          echo "GitHub Actor: $GITHUB_ACTOR"
+          docker --version
+          echo "Docker username secret set? -> ${{ secrets.DOCKER_USERNAME != '' }}"
+          echo "Docker password secret set? -> ${{ secrets.DOCKER_PASSWORD != '' }}"
+
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
@@ -20,11 +28,15 @@ jobs:
         run: |
           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/nodejs-cicd-demo
           GIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+          echo "Building Docker image: $IMAGE_NAME"
+          echo "Tags: latest, $GIT_SHA"
           docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:$GIT_SHA .
 
       - name: Push Docker image to Docker Hub
         run: |
           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/nodejs-cicd-demo
           GIT_SHA=$(echo $GITHUB_SHA | cut -c1-7)
+          echo "Pushing $IMAGE_NAME:latest"
           docker push $IMAGE_NAME:latest
+          echo "Pushing $IMAGE_NAME:$GIT_SHA"
           docker push $IMAGE_NAME:$GIT_SHA
