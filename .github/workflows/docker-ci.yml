@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout code
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -29,7 +29,7 @@ jobs:
           echo "Building Docker image: $IMAGE_NAME"
           docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:$GIT_SHA .
 
-      # Step 4: Push Docker image
+      # Step 4: Push Docker image to Docker Hub
       - name: Push Docker image
         run: |
           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/nodejs-cicd-demo
