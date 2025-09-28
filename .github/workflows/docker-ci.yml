@@ -14,13 +14,11 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.ISR143}}
+          password: ${{ secrets.ISR143 }}
 
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
           context: .
           push: true
-          tags: 
-           ${{ secrets.USERNAME }}/my-image:latest
-
+          tags: ${{ secrets.USERNAME }}/my-image:latest
